@@ -126,7 +126,7 @@ function App() {
         {nutriInfo && (
           <span className="m-5 text-danger text-center">
             {selectedFood?.quantity}gm of {selectedFood?.name} have{" "}
-            {nutriInfo?.nutritional_info?.calories} calories
+            {Math.trunc(nutriInfo?.nutritional_info?.calories)} calories
           </span>
         )}
       </div>
