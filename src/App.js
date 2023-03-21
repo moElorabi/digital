@@ -15,12 +15,15 @@ function App() {
   const [imageId, setImageId] = React.useState(null);
   const [selectedFood, setSelectedFood] = React.useState(null);
   const [nutriInfo, setNutriInfo] = React.useState(null);
+  const [loading, setLoding] = React.useState(false);
 
   const handleUploadImage = async (e) => {
+    setLoding(true);
     const foodNames = await retrieveFoodName(e.target.files[0]);
     const parsedFoodNames = JSON.parse(foodNames);
     setImageId(parsedFoodNames.imageId);
     arrangeObj(parsedFoodNames.recognition_results);
+    setLoding(false);
   };
 
   const arrangeObj = (arr) => {
@@ -67,70 +70,95 @@ function App() {
     const parsedNutriInfo = JSON.parse(nutriInfo);
     setNutriInfo(parsedNutriInfo);
   };
+
   return (
-    <>
-      <label>
-        Your Image File
+    <div className="d-flex justify-content-center flex-column m-3">
+      <div className="mb-3">
         <input
           type="file"
           name="image"
           id="image"
           accept="image/png, image/jpeg"
+          capture="environment"
           onChange={(e) => handleUploadImage(e)}
         />
-      </label>
-      <div className="list-group">
-        {foods &&
-          foods.map((e, key) => {
-            return (
-              <button
-                key={key}
-                type="button"
-                className="list-group-item list-group-item-action"
-                onClick={() => handleConfirmFood(e)}
-              >
-                {e.name}
-              </button>
-            );
-          })}
       </div>
-      <label>Quantity: </label>
-      <input
-        type="number"
-        id="quantity"
-        name="quantity"
-        min="1"
-        onInput={(e) => handleQuantitiy(e.target.value)}
-      />
+      {loading ? (
+        <div class="spinner-border text-primary" role="status"></div>
+      ) : (
+        <>
+          <div className="mb-3">
+            <select
+              class="form-select"
+              aria-label="Default select example"
+              id="food"
+              onChange={(e) => {
+                let select = document.getElementById("food");
+                let option = select.options[select.selectedIndex];
 
-      <div>
-        {selectedFood && (
-          <span className="m-5">
-            Food: {selectedFood?.name ? selectedFood?.name : "Choose a food"}
-          </span>
-        )}
-        {selectedFood && (
-          <span>
-            Quantity: {selectedFood?.quantity ? selectedFood?.quantity : 0}gm
-          </span>
-        )}
-      </div>
-      <button
-        type="button"
-        className="btn btn-primary d-block"
-        onClick={() => handleRetriveNutriInfo()}
-      >
-        Calculate calories
-      </button>
+                handleConfirmFood({
+                  name: option.innerHTML,
+                  id: parseInt(e.target.value),
+                });
+              }}
+            >
+              <option selected>Choose food</option>
+              {foods &&
+                foods.map((e) => {
+                  return (
+                    <option key={e.id} value={e.id}>
+                      {e.name}
+                    </option>
+                  );
+                })}
+            </select>
+          </div>
+
+          <div className="mb-3">
+            <label>Quantity: </label>
+            <input
+              type="number"
+              id="quantity"
+              name="quantity"
+              min="1"
+              onInput={(e) => handleQuantitiy(e.target.value)}
+            />
+          </div>
+
+          <div className="d-flex justify-content-between mb-2">
+            <h5>
+              Food:{" "}
+              <span class="badge bg-primary">
+                {selectedFood?.name ? selectedFood?.name : "Choose a food"}
+              </span>
+            </h5>
+            <h5>
+              Quantity:{" "}
+              <span class="badge bg-primary">
+                {selectedFood?.quantity ? selectedFood?.quantity : 0}gm
+              </span>
+            </h5>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary d-block"
+            onClick={() => handleRetriveNutriInfo()}
+          >
+            Calculate calories
+          </button>
+        </>
+      )}
       <div className="m-5 text-danger text-center">
         {nutriInfo && (
-          <span className="m-5 text-danger text-center">
-            {selectedFood?.quantity}gm of {selectedFood?.name} have{" "}
-            {Math.trunc(nutriInfo?.nutritional_info?.calories)} calories
-          </span>
+          <h5>
+            <span class="badge bg-primary">
+              {selectedFood?.quantity}gm of {selectedFood?.name} have{" "}
+              {Math.trunc(nutriInfo?.nutritional_info?.calories)} calories
+            </span>
+          </h5>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
