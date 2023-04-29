@@ -79,7 +79,6 @@ function App() {
           name="image"
           id="image"
           accept="image/png, image/jpeg"
-          capture="environment"
           onChange={(e) => handleUploadImage(e)}
         />
       </div>
